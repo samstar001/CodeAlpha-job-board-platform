@@ -1,6 +1,6 @@
 # Architecture and folder structure
 
-## Proposed stack
+## Implemented stack
 
 Implemented stack: Node.js 22/24 with JavaScript ES modules, Express, MongoDB, Prisma 6.19.0, Zod for validation, bcrypt for password hashing, JWT bearer access tokens, and Multer for bounded multipart uploads. Tests use Node's built-in node:test/assert tools, fetch, and temporary local servers. Exact installed dependency versions are captured in package-lock.json.
 
@@ -14,13 +14,12 @@ The controller translates HTTP input/output. The service implements business rul
 
 Resume upload flow: authenticate → enforce candidate role → bound multipart size → inspect PDF content → store under a generated name outside public assets → create metadata → return metadata. A download route authorizes access before streaming the file.
 
-## Proposed structure
+## Repository structure
 
 ```text
 docs/                       requirements, contracts, decisions, progress
 prisma/
   schema.prisma             MongoDB document models and indexes
-  data-changes/             explicit backfill scripts when needed
   seed.js                   fictional demo data
 src/
   app.js                    Express configuration; exported for tests
@@ -31,7 +30,6 @@ src/
     authenticate.js
     authorize.js
     validate.js
-    upload.js
     error-handler.js
   modules/
     auth/
@@ -40,10 +38,12 @@ src/
     resumes/
     applications/
     notifications/
-  utils/                    errors, pagination, file helpers
+  utils/api-error.js        expected public errors
 tests/
-  integration/
-  helpers/
+  foundation.test.js        HTTP, environment, and rate-limit tests
+  resumes.test.js           cleanup and path containment checks
+  auth.integration.test.js  complete isolated database workflow
+scripts/                    integration runner, docs generation, verification helpers
 storage/resumes/            private files; ignored by Git
 .env.example                placeholders only
 .gitignore
@@ -51,11 +51,11 @@ package.json
 README.md
 ```
 
-Each module has `*.routes.js`, `*.controller.js`, `*.service.js`, and `*.schema.js` as needed. Avoid empty scaffolding and a separate repository layer until it has a concrete benefit.
+Modules use route, controller, service, and schema files as needed. Notifications keep their small HTTP/validation layer in notifications.routes.js. Resume multipart parsing lives in resumes.routes.js and disk operations in resumes.service.js. The storage directory is created at runtime and is not committed. No data backfill scripts have been needed; add a documented prisma/data-changes directory only when needed.
 
 ## Configuration and safeguards
 
-Environment variables: `NODE_ENV`, `PORT`, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `UPLOAD_DIR`, and `CORS_ORIGIN`. Tests use a dedicated database and upload directory, never development or production data.
+Environment variables: `NODE_ENV`, `PORT`, `DATABASE_URL`, `TEST_DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `UPLOAD_DIR`, `MAX_RESUME_BYTES`, and `CORS_ORIGIN`. Tests use a dedicated database and temporary upload directory, never development or production data.
 
 Use TLS at deployment, security headers, a strict CORS allowlist, authentication rate limits, bounded JSON bodies, and parameterized Prisma queries. Never log passwords, tokens, or resume contents. Ignore secrets, dependencies, uploads, and test artifacts in Git.
 

@@ -1,5 +1,13 @@
 # Progress log
 
+## 2026-10-20 — CodeAlpha internship documentation alignment
+
+- Read and visually reviewed both pages of the full supplied CodeAlpha task/instructions PDF.
+- Identified this project as Task 4 and the third completed internship project after the user's reported Tasks 1/2 and LinkedIn posts; no earlier-project URLs were invented.
+- Added requirement-to-implementation mapping, reviewer/learning documentation index, actual folder tree, LinkedIn video outline, and delivery checklist.
+- Recorded the PDF's CodeAlpha_ProjectName naming pattern and the current repository-name difference. No remote rename, LinkedIn post, or form submission was performed.
+- Documentation-only change; runtime behavior unchanged. Relative Markdown links and referenced implementation paths checked before publishing.
+
 ## 2026-10-20 — Phase 7: submission complete
 
 - Notification phase saved as 66a0857; merged into main and prepared final artifacts on feat/submission.

@@ -1,6 +1,37 @@
-# Job Board Platform
+# CodeAlpha Backend Development Internship - Task 4: Job Board Platform
 
 A Node.js and Express REST API connecting employers who post jobs with candidates who apply using resumes.
+
+This repository contains **Task 4: Job Board Platform**, completed for the CodeAlpha Backend Development Internship. It is the third task in my internship portfolio, following Task 1 (Simple URL Shortener) and Task 2 (Event Registration System). Those two tasks were completed and shared on LinkedIn separately; their code is not included here.
+
+## Assignment coverage
+
+| CodeAlpha Task 4 requirement | Implementation |
+| --- | --- |
+| Express backend for jobs, employers, candidates, and applications | REST API with authenticated candidate/employer roles |
+| Models for employers, jobs, candidates, resumes, and applications | MongoDB models in [Prisma schema](prisma/schema.prisma) |
+| Post and search jobs | Employer publishing/editing/closing; public keyword and location search |
+| Upload resumes and apply for jobs | Private PDF storage and one application per candidate/job |
+| Track applications and update status | Candidate tracking and employer review with version checks |
+| Search filters | Employment type, work mode, location, keyword, and pagination |
+| Employer notifications | Atomic application notifications, employer inbox, unread filters, mark-as-read |
+| Optional admin panel and reporting | Not included; optional in the task brief |
+
+The workflow is employer registration → job publishing → candidate registration → resume upload → application → employer notification/review → candidate status tracking. This is a backend API; use Postman to demonstrate it.
+
+## Technology and project structure
+
+Node.js, Express, MongoDB, Prisma 6.19, JWT, bcrypt, Zod, and Multer provide routing, persistence, authentication, validation, and file uploads. Tests use Node's built-in test runner.
+
+```text
+src/        Express app/server, middleware, feature modules, and utilities
+prisma/     MongoDB schema and repeatable fictional demo seed
+tests/      Local checks and isolated full-workflow database tests
+scripts/    API documentation generation and verification helpers
+docs/       Requirements, architecture, API contract, walkthroughs, and submission guide
+```
+
+See the [actual folder structure](docs/02-architecture.md) and [CodeAlpha submission checklist](docs/15-codealpha-checklist.md). The checklist distinguishes the completed backend from repository naming, LinkedIn video, and form submission steps.
 
 Status: Required backend complete: authentication, profiles, jobs, private resumes, applications, status tracking, and employer notifications. Optional admin UI/reporting is not included.
 
@@ -26,6 +57,8 @@ Import [OpenAPI](docs/openapi.json) into Postman to explore all 21 operations. S
 
 ## Project guide
 
+Start at the [documentation index](docs/README.md) for separate reviewer, learning, and development-history paths.
+
 - [Requirements and scope](docs/01-requirements.md)
 - [Architecture and folder structure](docs/02-architecture.md)
 - [Data models](docs/03-data-models.md)
@@ -41,6 +74,7 @@ Import [OpenAPI](docs/openapi.json) into Postman to explore all 21 operations. S
 - [Applications, transactions, and status tracking](docs/13-applications-walkthrough.md)
 - [Complete setup, demo, and submission guide](docs/14-submission-guide.md)
 - [Importable OpenAPI specification](docs/openapi.json)
+- [CodeAlpha task coverage and delivery checklist](docs/15-codealpha-checklist.md)
 
 Start with the submission guide to run the project, then follow the numbered guides to learn the design. Earlier proposals and subsequent decisions are preserved in the decision log.
 

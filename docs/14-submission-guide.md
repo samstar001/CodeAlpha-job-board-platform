@@ -48,6 +48,8 @@ Import docs/openapi.json into Postman as an OpenAPI collection. Its default serv
 
 ## Submission
 
+Read docs/15-codealpha-checklist.md first. The supplied full PDF requires the repository pattern CodeAlpha_ProjectName, a LinkedIn video explanation with the repository link, and submission via the form shared in your WhatsApp group. The current repository name uses hyphens; the recommended literal-pattern name is CodeAlpha_JobBoardPlatform. No remote rename is included in this docs update. Complete or confirm these delivery steps before treating the internship submission as finished.
+
 Submit https://github.com/samstar001/CodeAlpha-job-board-platform through your internship Google Form. Ensure the reviewer can access the repository and choose main, which contains all completed phases. The form itself is not submitted by this project. Feature branches preserve the development history.
 
 Include source, Prisma schema, dependency lockfile, .env.example, tests, and docs in Git. Exclude secrets, node_modules, real resumes, and generated runtime files. Reviewers generate their own demo PDF by running the seed script.

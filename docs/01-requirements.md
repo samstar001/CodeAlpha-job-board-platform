@@ -2,9 +2,9 @@
 
 ## What the assignment asks for
 
-The supplied screenshot describes a job board backend using Django or Express. We will use Node.js and Express as requested. It asks for models for employers, job listings, candidates, resumes, and applications; APIs for posting/searching jobs, uploading resumes, applying, and tracking applications; search filters, status updates, and employer notifications. An admin panel and reporting are explicitly optional.
+Task 4 in the supplied CodeAlpha Backend Development Tasks & Instructions PDF describes a job board backend using Django or Express. This project uses Node.js and Express. It asks for models for employers, job listings, candidates, resumes, and applications; APIs for posting/searching jobs, uploading resumes, applying, and tracking applications; search filters, status updates, and employer notifications. An admin panel and reporting are explicitly optional.
 
-The screenshot is the source brief. The details below are implementation proposals to turn that brief into a testable system.
+The original screenshot and the complete supplied PDF are the assignment sources. The acceptance criteria below describe the implemented backend. Internship delivery requirements (repository naming, LinkedIn video, and submission form) are tracked separately in docs/15-codealpha-checklist.md.
 
 ## Roles
 
@@ -29,9 +29,9 @@ Users have one role for this submission. Registration creates the matching profi
 9. Invalid input, unauthenticated access, forbidden access, missing resources, and duplicates produce consistent errors.
 10. Setup instructions and example requests let a reviewer reproduce the main journey.
 
-## Scope for today's submission
+## Submitted implementation scope
 
-Build the backend and in-app notification endpoints. Store PDF files locally for development, with private authenticated downloads. Keep automated tests focused on permissions, application submission, and status rules.
+The backend includes in-app notification endpoints and local private PDF storage with authenticated downloads. Automated tests cover permissions, application submission, status rules, notifications, and file storage behavior.
 
 Defer email delivery, frontend, admin panel, analytics, password reset, email verification, resume parsing, recommendations, saved jobs, company teams, and cloud file storage. Optional work starts only after the core journey passes.
 
