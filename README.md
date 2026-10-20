@@ -2,7 +2,22 @@
 
 A Node.js and Express REST API connecting employers who post jobs with candidates who apply using resumes.
 
-Status: planning complete; implementation has not started.
+Status: Express foundation and identity schema implemented; authentication and feature routes are next.
+
+## Run locally
+
+Use Node.js 22 and a MongoDB replica set. Run `npm ci`, create your own `.env` using `.env.example`, and set a random JWT_SECRET of at least 32 characters. Follow the setup guide for connection details.
+
+```powershell
+npm run db:generate
+npm run db:validate
+npm run db:push
+npm run dev
+```
+
+`GET http://localhost:5000/api/v1/health` returns `{ "data": { "status": "ok" } }` (adjust for your PORT). Startup validates configuration and pings MongoDB before listening. The health route is process liveness, not a continuous database readiness probe.
+
+Use `npm start` to run without watch mode and `npm test` for foundation checks. Current tests use a temporary local HTTP server and do not access your database. Later database integration tests must use the separate test database. The implementation currently uses Node's built-in watch mode and test runner; nodemon, Vitest, and Supertest are not required for this phase.
 
 ## Project guide
 

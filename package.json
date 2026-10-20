@@ -2,12 +2,17 @@
   "name": "codealpha-job-board-platform",
   "version": "1.0.0",
   "description": "A Node.js and Express REST API connecting employers who post jobs with candidates who apply using resumes.",
-  "main": "index.js",
+  "main": "src/server.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "db:validate": "prisma validate",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate"
   },
   "repository": {
     "type": "git",

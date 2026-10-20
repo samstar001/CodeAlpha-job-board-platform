@@ -1,5 +1,15 @@
 # Progress log
 
+## 2026-10-20 — Express foundation
+
+- User confirmed successful MongoDB synchronization of the three identity collections and unique indexes.
+- Saved initial plan/schema/dependency baseline on main as f3fa4fe, then created codex/express-foundation.
+- Added Express app/server separation, validated configuration, shared Prisma client, startup database ping, graceful shutdown, health route, CORS/security headers, bounded JSON parsing, and safe error responses.
+- Added start/dev/test/database npm scripts and README quick start. Selected branch-per-phase workflow and included docs for reviewer context.
+- Verification: both Node test cases passed, covering real HTTP responses and configuration-secret redaction. Local HTTP connections required permission outside the sandbox.
+- Authentication and feature routes are not yet implemented. Foundation tests do not modify databases.
+- Configuration validation and a read-only MongoDB ping passed with network permission. Confirmed .env is ignored by Git.
+
 ## 2026-10-20 — Identity models
 
 - Added Role, User, CandidateProfile, and EmployerProfile to prisma/schema.prisma.

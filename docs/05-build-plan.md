@@ -25,12 +25,12 @@ Reserve the first short session for reviewing this plan and database setup. Spen
 
 The local repository is on `main` and has origin `https://github.com/samstar001/CodeAlpha-job-board-platform.git`. Remote access and push permissions have not yet been verified.
 
-For a solo deadline-driven submission, use small phase commits on main. If branch protection requires pull requests, use `codex/<feature>` branches instead. Before each phase commit:
+The user selected a branch per feature/phase. Start each branch from updated main, using names such as `codex/express-foundation`, `codex/auth-profiles`, `codex/jobs`, `codex/resumes`, and `codex/applications`. Commit and push the phase branch, review its diff (preferably in a pull request), then merge completed work into main before branching for the next phase. Submit the repository with completed features available on main. Before each phase commit:
 
 1. Run the checks relevant to that phase and record results in the progress log.
 2. Review `git status` and the diff. Stage named source/docs files; keep .env, uploads, dependency folders, and real personal data out of Git.
 3. Commit the completed slice with the suggested message or a precise equivalent.
-4. Push to origin and verify the remote branch contains the new commit.
+4. Push the phase branch with `git push -u origin <branch>` and verify the remote branch contains the new commit.
 5. Record the commit reference and remaining work in the log. Keep the commit hash in the next log update to avoid a self-referential commit.
 
 The user has requested feature/phase pushes as the project is built. Push completed work when available; do not mark an attempted or failed push as successful. This planning turn creates documentation only and does not commit or push it.

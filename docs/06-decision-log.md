@@ -20,6 +20,9 @@ Add a row when a decision changes, referring to the superseded ID and explaining
 
 ## Updates — 2026-10-20
 
+- D017 — Confirmed: use one branch per feature/phase, review and merge into main before the next phase. Include the docs folder in the submission repository.
+- D018 — Implementation: use Node's built-in watch mode and test runner for foundation checks, reducing setup dependencies. Vitest/Supertest remain optional for later test needs.
+
 - D012 — Confirmed: MongoDB replaces PostgreSQL, superseding D002's database choice. Use ObjectIds, unique indexes, service-enforced references, and a replica set for transactions.
 - D013 — Confirmed: user accepts the remaining architecture choices and wants to learn local storage while building. Teach each upload/download step with a dummy file and inspect disk plus metadata.
 - D014 — Confirmed: user creates and populates .env. Provide placeholders and variable explanations; never commit actual secrets.
