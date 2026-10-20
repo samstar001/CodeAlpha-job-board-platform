@@ -1,5 +1,10 @@
 # Progress log
 
+## 2026-10-20 — Startup feedback
+
+- Added a terminal confirmation after MongoDB connection and ping succeed, followed by the active HTTP port and health URL after listening starts.
+- Node syntax check and git diff whitespace check passed. Health response remains served by the GET route in src/app.js.
+
 ## 2026-10-20 — Phase 2: authentication and profiles
 
 - Advanced local main to verified setup commit 5c7f25a and created feat/auth-profiles.

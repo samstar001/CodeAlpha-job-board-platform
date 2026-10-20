@@ -24,9 +24,15 @@ try {
   const env = parseEnv(process.env);
   await prisma.$connect();
   await prisma.$runCommandRaw({ ping: 1 });
+  // Confirm successful database communication without exposing the connection URL.
+  console.log('MongoDB connected successfully');
   // Build the configured application and listen on the chosen port.
   const app = createApp({ corsOrigin: env.CORS_ORIGIN, db: prisma, jwtSecret: env.JWT_SECRET });
-  server = app.listen(env.PORT, () => console.log(`API listening on port ${env.PORT}`));
+  server = app.listen(env.PORT, () => {
+    // Print the active port and a local health URL only after HTTP startup succeeds.
+    console.log(`API listening on port ${env.PORT}`);
+    console.log(`Health check: http://localhost:${env.PORT}/api/v1/health`);
+  });
   // Handle listening failures such as a port already being used by another process.
   server.on('error', () => {
     console.error('HTTP server failed to start. Check the configured port.');
