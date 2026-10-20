@@ -1,5 +1,11 @@
 # Progress log
 
+## 2026-10-20 — Reading comments and branch naming
+
+- Added one-line explanations for logical sections in application code, tests, Prisma configuration, and schema; runtime behavior is unchanged.
+- User selected feat/project-setup and feat/<feature> branch naming, replacing the earlier prefix.
+- Foundation was previously pushed successfully as 2a0208c on codex/express-foundation; main baseline f3fa4fe was also verified remotely.
+
 ## 2026-10-20 — Express foundation
 
 - User confirmed successful MongoDB synchronization of the three identity collections and unique indexes.
@@ -48,4 +54,3 @@ Push result / remote verification:
 Remaining work or blockers:
 Next step:
 ```
-

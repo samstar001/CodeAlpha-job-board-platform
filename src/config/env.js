@@ -1,6 +1,8 @@
+// Load .env before reading configuration and import Zod's validation helpers.
 import 'dotenv/config';
 import { z } from 'zod';
 
+// Define allowed configuration values, defaults, and validation boundaries.
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(5000),
@@ -12,6 +14,7 @@ const schema = z.object({
   CORS_ORIGIN: z.url(),
 });
 
+// Validate configuration at startup and return only the supported settings.
 export function parseEnv(input) {
   const result = schema.safeParse(input);
   if (!result.success) {

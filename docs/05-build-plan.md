@@ -25,7 +25,7 @@ Reserve the first short session for reviewing this plan and database setup. Spen
 
 The local repository is on `main` and has origin `https://github.com/samstar001/CodeAlpha-job-board-platform.git`. Remote access and push permissions have not yet been verified.
 
-The user selected a branch per feature/phase. Start each branch from updated main, using names such as `codex/express-foundation`, `codex/auth-profiles`, `codex/jobs`, `codex/resumes`, and `codex/applications`. Commit and push the phase branch, review its diff (preferably in a pull request), then merge completed work into main before branching for the next phase. Submit the repository with completed features available on main. Before each phase commit:
+The user selected a branch per feature/phase. Start each branch from updated main, using names such as `feat/project-setup`, `feat/auth-profiles`, `feat/jobs`, `feat/resumes`, and `feat/applications`. Commit and push the phase branch, review its diff (preferably in a pull request), then merge completed work into main before branching for the next phase. Submit the repository with completed features available on main. Before each phase commit:
 
 1. Run the checks relevant to that phase and record results in the progress log.
 2. Review `git status` and the diff. Stage named source/docs files; keep .env, uploads, dependency folders, and real personal data out of Git.
@@ -42,4 +42,3 @@ Create an employer and a candidate → employer posts job → candidate searches
 ## Teaching checkpoint for each phase
 
 Explain the request path, the database records involved, the permission rule, and one failure case. Run a real request and inspect the response before moving on. Keep explanations tied to working code rather than introducing all framework concepts at once.
-

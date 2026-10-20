@@ -1,18 +1,15 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// Generate the JavaScript database client imported from @prisma/client.
 generator client {
   provider = "prisma-client-js"
 }
 
+// Connect to MongoDB using the private URL supplied through the environment.
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
+// Restrict account roles to the two supported user journeys.
 enum Role {
   CANDIDATE
   EMPLOYER
@@ -27,10 +24,12 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // Registration creates only the profile matching the account's role.
   candidateProfile CandidateProfile?
   employerProfile  EmployerProfile?
 }
 
+// Store candidate details separately from credentials; unique userId makes the link one-to-one.
 model CandidateProfile {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @unique @db.ObjectId
@@ -41,9 +40,11 @@ model CandidateProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Resolve the owning user through an ObjectId reference checked by application services.
   user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+// Store company details for a single employer account with a unique user reference.
 model EmployerProfile {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @unique @db.ObjectId
@@ -54,5 +55,6 @@ model EmployerProfile {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Keep user changes explicit instead of automatically cascading document operations.
   user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
