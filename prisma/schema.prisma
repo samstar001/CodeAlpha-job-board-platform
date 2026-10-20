@@ -54,7 +54,46 @@ model EmployerProfile {
   location    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  jobs        Job[]
 
   // Keep user changes explicit instead of automatically cascading document operations.
   user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+// Restrict job filters to the employment arrangements supported by the API.
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum WorkMode {
+  ONSITE
+  HYBRID
+  REMOTE
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+}
+
+// Preserve closed listings and their owner for later application tracking.
+model Job {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  employerId          String          @db.ObjectId
+  title               String
+  description         String
+  location            String
+  employmentType      EmploymentType
+  workMode            WorkMode
+  status              JobStatus       @default(OPEN)
+  applicationSequence Int             @default(0)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  employer            EmployerProfile @relation(fields: [employerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([status, createdAt])
+  @@index([employerId, createdAt])
 }

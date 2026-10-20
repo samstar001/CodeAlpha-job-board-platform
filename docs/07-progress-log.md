@@ -1,5 +1,15 @@
 # Progress log
 
+## 2026-10-20 — Phase 3: jobs
+
+- Advanced main to completed authentication commit 86cba4a, then created feat/jobs.
+- Added Job and employment/work-mode/status enums with owner and public-search indexes.
+- Added employer create/edit/close/reopen/own-list routes and public filtered, paginated search/detail routes. Owner ID is derived from the authenticated employer and included in atomic update conditions.
+- Verified schema format/validation, generated Prisma Client, and passed the expanded MongoDB integration suite against job_board_test. Tests cover authentication plus job role checks, ownership, validation, literal/combined search, pagination, closed visibility, and reopening; test-created records were removed.
+- All three local regression checks passed. Development db push added only the Job collection/indexes and regenerated the client; no database reset performed.
+- Windows initially locked the Prisma engine while the API ran; user stopped the API and generation then passed. Restart with npm run dev.
+- Added docs/11-jobs-walkthrough.md with what/why, request flow, endpoints, example bodies, and limitations. Next phase: private resume storage.
+
 ## 2026-10-20 — Code readability
 
 - Reduced app.js/server.js comments to short explanations per logical section and added blank lines between related blocks at the user's request.

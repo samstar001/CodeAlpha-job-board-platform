@@ -7,6 +7,7 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { profileRoutes } from './modules/profiles/profiles.routes.js';
 import { createProfileService } from './modules/profiles/profiles.service.js';
 import { createProfileController } from './modules/profiles/profiles.controller.js';
+import { jobRoutes } from './modules/jobs/jobs.routes.js';
 
 // Configure the app independently of the server so it can be tested without startup.
 export function createApp({ corsOrigin, db, jwtSecret }) {
@@ -28,6 +29,7 @@ export function createApp({ corsOrigin, db, jwtSecret }) {
 
     app.use('/api/v1/auth', authRoutes({ db, secret: jwtSecret, authenticate: guard, profiles }));
     app.use('/api/v1', profileRoutes(guard, profiles));
+    app.use('/api/v1', jobRoutes(db, guard));
   }
 
   // Keep fallback and error handlers after all routes.

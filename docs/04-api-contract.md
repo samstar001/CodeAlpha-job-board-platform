@@ -36,6 +36,8 @@ Status codes: 200 read/update/login, 201 create, 400 invalid input, 401 missing/
 
 All list endpoints accept `page` (default 1) and `limit` (default 20, max 100). Sort by createdAt descending, then id descending for stable ordering. Public job search also accepts `q`, `location`, `employmentType`, and `workMode`. Keyword matches title or description; location is a case-insensitive substring; enum filters are exact. Combine different filters with AND. Blank text filters are ignored; invalid enum values return 400.
 
+Job-list page values are capped at 10000, keyword length at 200, and location length at 160. Unsupported query fields are rejected. Text filters match literal input, including regex punctuation.
+
 ## Validation boundaries
 
 Trim user text, normalize email, and leave password bytes unchanged. Email max 254 characters. Password 8–72 UTF-8 bytes for bcrypt. Names max 120 characters, job title max 160, location max 160, headline max 200, bio/company description max 5,000, job description 20–20,000, cover letter max 5,000. Required text must be nonblank. Website must be an HTTP(S) URL. PATCH must contain at least one supported field. Version is a positive integer. Never accept owner IDs from request bodies.
