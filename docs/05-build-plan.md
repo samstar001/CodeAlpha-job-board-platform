@@ -2,6 +2,8 @@
 
 ## Working approach
 
+All required phases (0–7) are implemented. Feature branch history records each slice; final main is the submission branch. Optional admin/reporting and frontend remain outside the backend scope. See docs/14-submission-guide.md for reviewer setup.
+
 Complete one vertical slice, demonstrate it, review the code together, then commit and push it. A phase is complete only when its acceptance checks pass. Record actual progress, not planned work, in the progress log. If time is tight, drop optional features before cutting permissions or core validation.
 
 | Phase | Deliverable | Completion check | Suggested commit |

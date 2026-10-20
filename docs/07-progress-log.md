@@ -1,5 +1,15 @@
 # Progress log
 
+## 2026-10-20 — Phase 7: submission complete
+
+- Notification phase saved as 66a0857; merged into main and prepared final artifacts on feat/submission.
+- Added repeatable fictional seed accounts/job, a valid demo PDF, application, and notification. Ran the seed twice and verified stable IDs; existing passwords and workflow state are preserved.
+- Generated docs/openapi.json for all 21 implemented operations and added complete clone/setup/demo/submission instructions. README reflects the completed backend and operational limits.
+- Fresh temporary copy: npm ci installed 133 packages; explicit client generation and schema validation passed; all five local tests passed. No secrets or uploads were copied. Dependency lifecycle-script warnings did not prevent successful generation or tests.
+- Full isolated MongoDB workflow passed with notification cases in approximately 96 seconds. Real server startup check passed with MongoDB connectivity, success message, configured port, and health response. Git whitespace check passed.
+- No reset of development data; only fictional seed records and their dummy PDF were added. Private uploads and .env remain excluded from Git.
+- Required backend scope is complete. Optional admin/reporting, frontend, hosted deployment, and Google Form submission are not included. User will submit the GitHub main link; the guided project walkthrough follows afterward.
+
 ## 2026-10-20 — Phase 6: employer notification inbox
 
 - Advanced main to applications commit c40fc8a and created feat/notifications.

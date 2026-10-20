@@ -20,6 +20,8 @@ Add a row when a decision changes, referring to the superseded ID and explaining
 
 ## Updates — 2026-10-20
 
+- D020 — Confirmed: user authorized completing all remaining required backend phases for submission and postponing the full guided explanation until afterward. Notifications, demo seed, importable API docs, and final verification complete the required scope; optional admin/reporting remains deferred.
+
 - D019 — Confirmed: use feat/project-setup for the foundation and feat/<feature> for future work, superseding the codex/ prefix. Add short one-line comments before logical code sections to support learning.
 
 - D017 — Confirmed: use one branch per feature/phase, review and merge into main before the next phase. Include the docs folder in the submission repository.

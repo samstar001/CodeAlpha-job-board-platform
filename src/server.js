@@ -29,7 +29,8 @@ try {
 
   // Start HTTP only after the database is available.
   const app = createApp({ corsOrigin: env.CORS_ORIGIN, db: prisma, jwtSecret: env.JWT_SECRET, uploadDir: env.UPLOAD_DIR, maxResumeBytes: env.MAX_RESUME_BYTES });
-  server = app.listen(env.PORT, () => {
+  server = app.listen(env.PORT, error => {
+    if (error) return;
     console.log(`API listening on port ${env.PORT}`);
     console.log(`Health check: http://localhost:${env.PORT}/api/v1/health`);
   });

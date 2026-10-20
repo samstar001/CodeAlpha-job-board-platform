@@ -2,7 +2,7 @@
 
 ## Proposed stack
 
-Node.js with JavaScript ES modules, Express, MongoDB, Prisma, Zod for validation, bcrypt for password hashing, JWT bearer access tokens, Multer for bounded multipart uploads, and Vitest/Supertest for tests. Confirm compatible maintained package versions when installing; no versions are pinned by this plan.
+Implemented stack: Node.js 22/24 with JavaScript ES modules, Express, MongoDB, Prisma 6.19.0, Zod for validation, bcrypt for password hashing, JWT bearer access tokens, and Multer for bounded multipart uploads. Tests use Node's built-in node:test/assert tools, fetch, and temporary local servers. Exact installed dependency versions are captured in package-lock.json.
 
 MongoDB stores documents in collections. Prisma 6.19 describes models, generates a query client, and synchronizes indexes using `db push`. MongoDB does not enforce foreign keys: services validate references and ownership. Unique indexes enforce email and application uniqueness. A replica set is required for our multi-document transactions. This is a single application, suitable for the submission deadline.
 

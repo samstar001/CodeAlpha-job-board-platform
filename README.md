@@ -2,22 +2,27 @@
 
 A Node.js and Express REST API connecting employers who post jobs with candidates who apply using resumes.
 
-Status: Authentication, profiles, jobs, private resumes, and application/status tracking implemented. Employer notification inbox is next.
+Status: Required backend complete: authentication, profiles, jobs, private resumes, applications, status tracking, and employer notifications. Optional admin UI/reporting is not included.
 
 ## Run locally
 
-Use Node.js 22 and a MongoDB replica set. Run `npm ci`, create your own `.env` using `.env.example`, and set a random JWT_SECRET of at least 32 characters. Follow the setup guide for connection details.
+Use Node.js 22 or 24 and a MongoDB replica set. Run `npm ci`, create your own `.env` using `.env.example`, and set a random JWT_SECRET of at least 32 characters. Follow the submission guide for the complete fresh-clone procedure.
 
 ```powershell
 npm run db:generate
 npm run db:validate
 npm run db:push
+npm run db:seed
 npm run dev
 ```
 
 `GET http://localhost:5000/api/v1/health` returns `{ "data": { "status": "ok" } }` (adjust for your PORT). Startup validates configuration and pings MongoDB before listening. The health route is process liveness, not a continuous database readiness probe.
 
-Use `npm start` to run without watch mode and `npm test` for local HTTP/configuration/rate-limit checks without database access. Run `npm run test:integration` explicitly for authentication tests against the separate job_board_test database; see the authentication walkthrough for safeguards. The implementation uses Node's built-in watch mode and test runner; nodemon, Vitest, and Supertest are not required.
+Use `npm start` to run without watch mode and `npm test` for local checks without database access. Run `npm run test:integration` for the full workflow against the separate job_board_test database and temporary file storage. The implementation uses Node's built-in watch mode and test runner.
+
+The seed adds fictional employer/candidate accounts, a job, PDF, application, and notification without resetting data. Newly created demo accounts employer@demo.example and candidate@demo.example use DemoPassword123!; existing passwords remain unchanged. Seed is optional and disabled in production.
+
+Import [OpenAPI](docs/openapi.json) into Postman to explore all 21 operations. See the [submission guide](docs/14-submission-guide.md) for setup, demo steps, scope, and limitations.
 
 ## Project guide
 
@@ -34,8 +39,10 @@ Use `npm start` to run without watch mode and `npm test` for local HTTP/configur
 - [Job publishing and search walkthrough](docs/11-jobs-walkthrough.md)
 - [Resume storage, packages, and code walkthrough](docs/12-resumes-walkthrough.md)
 - [Applications, transactions, and status tracking](docs/13-applications-walkthrough.md)
+- [Complete setup, demo, and submission guide](docs/14-submission-guide.md)
+- [Importable OpenAPI specification](docs/openapi.json)
 
-Start with requirements, then follow the guides in order. Technology choices beyond Node.js and Express are proposals recorded in the decision log.
+Start with the submission guide to run the project, then follow the numbered guides to learn the design. Earlier proposals and subsequent decisions are preserved in the decision log.
 
 ## Main user journey
 

@@ -13,7 +13,9 @@
     "test:integration": "node scripts/test-integration.js",
     "db:validate": "prisma validate",
     "db:push": "prisma db push",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "db:seed": "node prisma/seed.js",
+    "docs:generate": "node scripts/generate-api-docs.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": { "node": ">=22 <25" },
   "bugs": {
     "url": "https://github.com/samstar001/CodeAlpha-job-board-platform/issues"
   },
