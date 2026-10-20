@@ -31,15 +31,16 @@ model User {
 
 // Store candidate details separately from credentials; unique userId makes the link one-to-one.
 model CandidateProfile {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @unique @db.ObjectId
-  fullName  String
-  headline  String?
-  location  String?
-  bio       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  resumes   Resume[]
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String        @unique @db.ObjectId
+  fullName     String
+  headline     String?
+  location     String?
+  bio          String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  resumes      Resume[]
+  applications Application[]
 
   // Resolve the owning user through an ObjectId reference checked by application services.
   user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -55,21 +56,23 @@ model Resume {
   sizeBytes    Int
   createdAt    DateTime         @default(now())
   candidate    CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  applications Application[]
 
   @@index([candidateId, createdAt])
 }
 
 // Store company details for a single employer account with a unique user reference.
 model EmployerProfile {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @unique @db.ObjectId
-  companyName String
-  description String?
-  website     String?
-  location    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  jobs        Job[]
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String         @unique @db.ObjectId
+  companyName   String
+  description   String?
+  website       String?
+  location      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  jobs          Job[]
+  notifications Notification[]
 
   // Keep user changes explicit instead of automatically cascading document operations.
   user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -108,7 +111,56 @@ model Job {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   employer            EmployerProfile @relation(fields: [employerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  applications        Application[]
 
   @@index([status, createdAt])
   @@index([employerId, createdAt])
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  REVIEWING
+  SHORTLISTED
+  HIRED
+  REJECTED
+}
+
+enum NotificationType {
+  NEW_APPLICATION
+}
+
+// A candidate can submit once per job and retain the exact resume selected at submission.
+model Application {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  jobId         String            @db.ObjectId
+  candidateId   String            @db.ObjectId
+  resumeId      String            @db.ObjectId
+  coverLetter   String?
+  status        ApplicationStatus @default(SUBMITTED)
+  version       Int               @default(1)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  job           Job               @relation(fields: [jobId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  candidate     CandidateProfile  @relation(fields: [candidateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  resume        Resume            @relation(fields: [resumeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  notifications Notification[]
+
+  @@unique([jobId, candidateId])
+  @@index([candidateId, createdAt])
+  @@index([jobId, createdAt])
+}
+
+// Persist notification delivery with the application; viewing endpoints follow in phase 6.
+model Notification {
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  employerId    String           @db.ObjectId
+  applicationId String           @db.ObjectId
+  type          NotificationType @default(NEW_APPLICATION)
+  readAt        DateTime?
+  createdAt     DateTime         @default(now())
+  employer      EmployerProfile  @relation(fields: [employerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  application   Application      @relation(fields: [applicationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([applicationId, type])
+  @@index([employerId, readAt, createdAt])
 }

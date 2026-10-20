@@ -54,10 +54,13 @@ export function createResumeService(db, directory) {
       return { data: resumes.map(present), meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
     },
 
-    // Employers receive access only after application links are implemented in the next phase.
+    // Permit the candidate owner or an employer whose own job has an application using this resume.
     async download(user, id) {
       const resume = await db.resume.findUnique({ where: { id }, include: { candidate: { select: { userId: true } } } });
-      if (!resume || user.role !== 'CANDIDATE' || resume.candidate.userId !== user.id) throw new ApiError(404, 'NOT_FOUND', 'Resume not found');
+      if (!resume) throw new ApiError(404, 'NOT_FOUND', 'Resume not found');
+      const owner = user.role === 'CANDIDATE' && resume.candidate.userId === user.id;
+      const linkedEmployer = user.role === 'EMPLOYER' && await db.application.findFirst({ where: { resumeId: id, job: { employer: { userId: user.id } } }, select: { id: true } });
+      if (!owner && !linkedEmployer) throw new ApiError(404, 'NOT_FOUND', 'Resume not found');
       const filePath = resolveResumePath(directory, resume.storageKey);
       try { await access(filePath); } catch (error) {
         if (error.code === 'ENOENT') throw new ApiError(404, 'NOT_FOUND', 'Resume file not found');

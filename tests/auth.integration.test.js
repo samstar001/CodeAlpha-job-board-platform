@@ -11,8 +11,9 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { createApp } from '../src/app.js';
+import { createApplicationService } from '../src/modules/applications/applications.service.js';
 
-test('authentication, jobs, and private resume workflow', { skip: process.env.RUN_DB_TESTS !== '1', timeout: 120000 }, async () => {
+test('authentication, jobs, resumes, and application lifecycle', { skip: process.env.RUN_DB_TESTS !== '1', timeout: 180000 }, async () => {
   // Refuse any database except the explicitly named test database, distinct from development.
   const url = process.env.TEST_DATABASE_URL;
   assert.ok(url, 'Set TEST_DATABASE_URL');
@@ -161,6 +162,61 @@ test('authentication, jobs, and private resume workflow', { skip: process.env.RU
     assert.equal((await uploadFile(pdf, 'resume.pdf', 'application/pdf', token, 'wrong')).status, 400);
     assert.equal((await request('/resumes', { method: 'POST', token, body: {} })).status, 400);
     assert.equal((await readdir(uploadDir)).length, 1);
+
+    // Submission must validate ownership, reject closed jobs, and create one notification atomically.
+    assert.equal((await request(`/jobs/${jobId}/applications`, { method: 'POST', token: other.body.data.token, body: { resumeId } })).status, 404);
+    assert.equal((await request(`/jobs/${jobId}/applications`, { method: 'POST', token: employerToken, body: { resumeId } })).status, 403);
+    assert.equal((await request('/jobs/invalid/applications', { method: 'POST', token, body: { resumeId } })).status, 400);
+    await request(`/jobs/${jobId}`, { method: 'PATCH', token: employerToken, body: { status: 'CLOSED' } });
+    assert.equal((await request(`/jobs/${jobId}/applications`, { method: 'POST', token, body: { resumeId } })).status, 409);
+    await request(`/jobs/${jobId}`, { method: 'PATCH', token: employerToken, body: { status: 'OPEN' } });
+
+    // Simulate notification storage failure inside a real transaction and prove no partial writes survive.
+    const failureDb = { candidateProfile: db.candidateProfile, $transaction: work => db.$transaction(tx => work({ ...tx, notification: { create: async () => { throw new Error('Simulated notification failure'); } } })) };
+    await assert.rejects(createApplicationService(failureDb).apply(stored, jobId, { resumeId }), /Simulated notification failure/);
+    assert.equal(await db.application.count({ where: { jobId } }), 0);
+    assert.equal((await db.job.findUnique({ where: { id: jobId } })).applicationSequence, 0);
+
+    const submissions = await Promise.all([1, 2].map(() => request(`/jobs/${jobId}/applications`, { method: 'POST', token, body: { resumeId, coverLetter: 'I would like to join your backend team.' } })));
+    assert.deepEqual(submissions.map(result => result.status).sort(), [201, 409]);
+    const application = submissions.find(result => result.status === 201).body.data;
+    assert.equal(application.status, 'SUBMITTED');
+    assert.equal(application.version, 1);
+    assert.equal(application.resume.storageKey, undefined);
+    assert.equal(await db.notification.count({ where: { applicationId: application.id } }), 1);
+    assert.equal((await db.job.findUnique({ where: { id: jobId } })).applicationSequence, 1);
+    assert.equal((await request('/applications/me', { token })).body.meta.total, 1);
+    assert.equal((await request(`/jobs/${jobId}/applications`, { token: employerToken })).body.data[0].id, application.id);
+    assert.equal((await request(`/applications/${application.id}`, { token: other.body.data.token })).status, 404);
+    const employerDownload = await fetch(`${base}/resumes/${resumeId}/download`, { headers: { Authorization: `Bearer ${employerToken}` } });
+    assert.equal(employerDownload.status, 200);
+    await employerDownload.arrayBuffer();
+
+    // An unrelated employer cannot review, download, list applicants, or update the application.
+    const outsiderEmail = `${prefix}-outsider@example.com`;
+    emails.push(outsiderEmail);
+    const outsider = await db.user.create({ data: { email: outsiderEmail, passwordHash: stored.passwordHash, role: 'EMPLOYER', employerProfile: { create: { companyName: 'Unrelated Employer' } } } });
+    const outsiderToken = jwt.sign({}, secret, { subject: outsider.id, expiresIn: '1h', issuer: 'job-board-api', audience: 'job-board-client' });
+    assert.equal((await request(`/jobs/${jobId}/applications`, { token: outsiderToken })).status, 404);
+    assert.equal((await request(`/applications/${application.id}`, { token: outsiderToken })).status, 404);
+    assert.equal((await request(`/resumes/${resumeId}/download`, { token: outsiderToken })).status, 404);
+    const statusPath = `/applications/${application.id}/status`;
+    assert.equal((await request(statusPath, { method: 'PATCH', token: outsiderToken, body: { status: 'REVIEWING', version: 1 } })).status, 404);
+    assert.equal((await request(statusPath, { method: 'PATCH', token, body: { status: 'REVIEWING', version: 1 } })).status, 403);
+    assert.equal((await request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'HIRED', version: 1 } })).status, 409);
+
+    // Competing status writes cannot overwrite one another; stale and terminal updates are rejected.
+    const updates = await Promise.all([1, 2].map(() => request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'REVIEWING', version: 1 } })));
+    assert.deepEqual(updates.map(result => result.status).sort(), [200, 409]);
+    assert.equal((await request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'REVIEWING', version: 2 } })).body.data.version, 2);
+    assert.equal((await request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'SHORTLISTED', version: 1 } })).status, 409);
+    assert.equal((await request('/applications/me?status=REVIEWING', { token })).body.meta.total, 1);
+    await request(`/jobs/${jobId}`, { method: 'PATCH', token: employerToken, body: { status: 'CLOSED' } });
+    assert.equal((await request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'SHORTLISTED', version: 2 } })).body.data.version, 3);
+    assert.equal((await request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'HIRED', version: 3 } })).body.data.status, 'HIRED');
+    assert.equal((await request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'REJECTED', version: 4 } })).status, 409);
+    assert.equal((await request(`/applications/${application.id}`, { token })).body.data.status, 'HIRED');
+
     await unlink(path.join(uploadDir, files[0]));
     assert.equal((await request(`/resumes/${resumeId}/download`, { token })).status, 404);
 
@@ -175,6 +231,9 @@ test('authentication, jobs, and private resume workflow', { skip: process.env.RU
       const ids = users.map(user => user.id);
       const employers = await db.employerProfile.findMany({ where: { userId: { in: ids } }, select: { id: true } });
       const candidates = await db.candidateProfile.findMany({ where: { userId: { in: ids } }, select: { id: true } });
+      const applications = await db.application.findMany({ where: { candidateId: { in: candidates.map(profile => profile.id) } }, select: { id: true } });
+      await db.notification.deleteMany({ where: { applicationId: { in: applications.map(item => item.id) } } });
+      await db.application.deleteMany({ where: { id: { in: applications.map(item => item.id) } } });
       await db.resume.deleteMany({ where: { candidateId: { in: candidates.map(profile => profile.id) } } });
       await db.job.deleteMany({ where: { employerId: { in: employers.map(profile => profile.id) } } });
       await db.candidateProfile.deleteMany({ where: { userId: { in: ids } } });

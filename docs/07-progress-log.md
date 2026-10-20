@@ -1,5 +1,15 @@
 # Progress log
 
+## 2026-10-20 — Phase 5: applications and tracking
+
+- Advanced main to resume commit 621cc20, then created feat/applications.
+- Added Application/Notification models, compound uniqueness, and query indexes. Submission coordinates with job closing through a shared job write, validates resume ownership, and atomically creates application plus employer notification with bounded transaction-conflict retries.
+- Added candidate lists, owner-employer applicant lists, authorized detail reads, status lifecycle/version checks, and linked-employer resume downloads. Notification inbox endpoints remain phase 6.
+- Five local checks passed. Expanded isolated MongoDB suite passed in approximately 76 seconds, covering notification-failure rollback, simultaneous duplicate submissions, one notification, competing/stale status updates, lifecycle rules, closed-job rejection, reviewing after closure, ownership, and linked downloads alongside earlier feature checks. Test records/files were cleaned up.
+- Schema formatting/validation and client generation passed. Development synchronization added Application/Notification collections/indexes without resetting existing data.
+- No new packages installed. Added docs/13-applications-walkthrough.md explaining package choices, transaction/ownership/version code, Postman examples, and limitations.
+- Next: notification inbox and read status.
+
 ## 2026-10-20 — Phase 4: private resumes
 
 - Advanced main to verified job commit f06cdfd and created feat/resumes.
