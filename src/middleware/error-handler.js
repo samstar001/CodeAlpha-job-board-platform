@@ -1,9 +1,15 @@
 import { ApiError } from '../utils/api-error.js';
+import multer from 'multer';
 
 // Express recognizes error middleware by its four parameters, including next.
 export function errorHandler(error, req, res, next) {
   // Delegate errors when the response has already started to avoid sending headers twice.
   if (res.headersSent) return next(error);
+  // Translate multipart size and shape failures into consistent public errors.
+  if (error instanceof multer.MulterError) {
+    const oversized = error.code === 'LIMIT_FILE_SIZE';
+    return res.status(oversized ? 413 : 400).json({ error: { code: oversized ? 'FILE_TOO_LARGE' : 'INVALID_UPLOAD', message: oversized ? 'Resume exceeds the upload size limit' : 'Send exactly one file using the file field, without extra fields' } });
+  }
   // Return only intentionally public details from expected business-rule failures.
   if (error instanceof ApiError) return res.status(error.status).json({ error: { code: error.code, message: error.message, ...(error.details ? { details: error.details } : {}) } });
   // Translate malformed JSON into a client-readable validation response.

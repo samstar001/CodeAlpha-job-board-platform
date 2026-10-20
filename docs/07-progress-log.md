@@ -1,5 +1,15 @@
 # Progress log
 
+## 2026-10-20 — Phase 4: private resumes
+
+- Advanced main to verified job commit f06cdfd and created feat/resumes.
+- Added immutable Resume metadata with candidate references and private UUID-named PDF files; candidate upload/list and authenticated owner-only downloads are implemented.
+- Added bounded Multer parsing, PDF type/header checks, private attachment downloads, path containment checks, per-IP upload limits, four-handler concurrency cap, and cleanup after metadata persistence failure.
+- Five local tests passed, including simulated persistence-failure cleanup and traversal rejection. Expanded MongoDB integration passed against job_board_test with temporary storage and cleanup, including existing auth/job flows and new upload/download ownership, bytes, validation, size limits, and missing-file cases.
+- Schema formatting/validation and client generation passed. Development db push added Resume collection/indexes without reset; no actual resume was uploaded to development during tests.
+- No new dependencies. Added docs/12-resumes-walkthrough.md explaining packages, important code lines, Postman steps, and storage limitations. Employer access is deferred until application links exist.
+- Next phase: applications, status transitions, and atomic notification creation.
+
 ## 2026-10-20 — Phase 3: jobs
 
 - Advanced main to completed authentication commit 86cba4a, then created feat/jobs.

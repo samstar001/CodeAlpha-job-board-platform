@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test tests/foundation.test.js tests/auth.integration.test.js",
+    "test": "node --test tests/foundation.test.js tests/resumes.test.js tests/auth.integration.test.js",
     "test:integration": "node scripts/test-integration.js",
     "db:validate": "prisma validate",
     "db:push": "prisma db push",

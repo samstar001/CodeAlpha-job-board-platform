@@ -8,6 +8,8 @@ Error: `{ "error": { "code": "VALIDATION_ERROR", "message": "Invalid input", "de
 
 Status codes: 200 read/update/login, 201 create, 400 invalid input, 401 missing/invalid token, 403 wrong role, 404 missing or inaccessible owned resource, 409 duplicate/invalid transition/stale version/closed job, 413 upload too large, 415 unsupported file, 429 rate limited, 500 unexpected failure. Never return passwordHash, storageKey, or filesystem paths.
 
+Resume uploads accept exactly one multipart file field named file, with no extra form fields. They are limited to 10 attempts per 15 minutes per IP and four active handlers per process; overload returns 503 UPLOAD_BUSY. Current phase supports owner-only downloads. Employer access requires the application links implemented in the following phase.
+
 ## Endpoints
 
 | Method and path | Access | Input / behavior |

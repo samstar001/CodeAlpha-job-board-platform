@@ -2,7 +2,7 @@
 
 A Node.js and Express REST API connecting employers who post jobs with candidates who apply using resumes.
 
-Status: Express foundation, authentication, profiles, and job publishing/search implemented. Private resumes are next.
+Status: Express foundation, authentication, profiles, jobs, and private resume storage implemented. Applications are next.
 
 ## Run locally
 
@@ -32,6 +32,7 @@ Use `npm start` to run without watch mode and `npm test` for local HTTP/configur
 - [How local resume storage works](docs/09-local-file-storage.md)
 - [Authentication walkthrough and requests](docs/10-authentication-walkthrough.md)
 - [Job publishing and search walkthrough](docs/11-jobs-walkthrough.md)
+- [Resume storage, packages, and code walkthrough](docs/12-resumes-walkthrough.md)
 
 Start with requirements, then follow the guides in order. Technology choices beyond Node.js and Express are proposals recorded in the decision log.
 

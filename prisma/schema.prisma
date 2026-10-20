@@ -39,9 +39,24 @@ model CandidateProfile {
   bio       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  resumes   Resume[]
 
   // Resolve the owning user through an ObjectId reference checked by application services.
   user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+// Keep immutable file metadata in MongoDB while PDF bytes remain on private disk storage.
+model Resume {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  candidateId  String           @db.ObjectId
+  originalName String
+  storageKey   String           @unique
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime         @default(now())
+  candidate    CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([candidateId, createdAt])
 }
 
 // Store company details for a single employer account with a unique user reference.

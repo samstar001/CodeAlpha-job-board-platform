@@ -3,13 +3,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { mkdtemp, readdir, readFile, unlink, rmdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { createApp } from '../src/app.js';
 
-test('authentication, profiles, and job publishing/search permissions', { skip: process.env.RUN_DB_TESTS !== '1', timeout: 120000 }, async () => {
+test('authentication, jobs, and private resume workflow', { skip: process.env.RUN_DB_TESTS !== '1', timeout: 120000 }, async () => {
   // Refuse any database except the explicitly named test database, distinct from development.
   const url = process.env.TEST_DATABASE_URL;
   assert.ok(url, 'Set TEST_DATABASE_URL');
@@ -21,7 +24,8 @@ test('authentication, profiles, and job publishing/search permissions', { skip: 
   assert.equal(setup.status, 0, 'Test database schema synchronization failed');
   const db = new PrismaClient({ datasourceUrl: url });
   const secret = randomUUID() + randomUUID();
-  const server = createApp({ corsOrigin: 'http://localhost:3000', db, jwtSecret: secret }).listen(0, '127.0.0.1');
+  const uploadDir = await mkdtemp(path.join(tmpdir(), 'job-board-resume-test-'));
+  const server = createApp({ corsOrigin: 'http://localhost:3000', db, jwtSecret: secret, uploadDir, maxResumeBytes: 1024 }).listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}/api/v1`;
   const prefix = randomUUID();
@@ -121,6 +125,45 @@ test('authentication, profiles, and job publishing/search permissions', { skip: 
     assert.equal((await request('/employers/me/jobs', { token: employerToken })).body.data[0].id, jobId);
     assert.equal((await request(`/jobs/${jobId}`, { method: 'PATCH', token: employerToken, body: { status: 'OPEN', title: `Updated ${prefix}` } })).body.data.status, 'OPEN');
 
+    // Compare uploaded bytes on disk and download, while denying unrelated users and employers.
+    const pdf = Buffer.from('%PDF-1.4\nDummy resume for API storage tests\n%%EOF');
+    async function uploadFile(bytes, filename = 'resume.pdf', mime = 'application/pdf', bearer = token, field = 'file') {
+      const form = new FormData();
+      form.append(field, new Blob([bytes], { type: mime }), filename);
+      const response = await fetch(`${base}/resumes`, { method: 'POST', headers: bearer ? { Authorization: `Bearer ${bearer}` } : {}, body: form });
+      return { status: response.status, body: await response.json() };
+    }
+    const uploaded = await uploadFile(pdf);
+    assert.equal(uploaded.status, 201);
+    const resumeId = uploaded.body.data.id;
+    assert.equal(uploaded.body.data.storageKey, undefined);
+    assert.equal(uploaded.body.data.sizeBytes, pdf.length);
+    const files = await readdir(uploadDir);
+    assert.equal(files.length, 1);
+    assert.notEqual(files[0], 'resume.pdf');
+    assert.deepEqual(await readFile(path.join(uploadDir, files[0])), pdf);
+    const download = await fetch(`${base}/resumes/${resumeId}/download`, { headers: { Authorization: `Bearer ${token}` } });
+    assert.equal(download.status, 200);
+    assert.match(download.headers.get('content-disposition'), /^attachment/);
+    assert.equal(download.headers.get('cache-control'), 'private, no-store');
+    assert.deepEqual(Buffer.from(await download.arrayBuffer()), pdf);
+    assert.equal((await request('/resumes/me', { token })).body.meta.total, 1);
+    assert.equal((await request('/resumes/me', { token: other.body.data.token })).body.meta.total, 0);
+    assert.equal((await request(`/resumes/${resumeId}/download`, { token: other.body.data.token })).status, 404);
+    assert.equal((await request(`/resumes/${resumeId}/download`, { token: employerToken })).status, 404);
+    assert.equal((await request(`/resumes/${resumeId}/download`)).status, 401);
+    assert.equal((await request('/resumes/invalid/download', { token })).status, 400);
+    assert.equal((await uploadFile(pdf, 'resume.pdf', 'application/pdf', employerToken)).status, 403);
+    assert.equal((await uploadFile(pdf, 'resume.pdf', 'application/pdf', '')).status, 401);
+    assert.equal((await uploadFile(Buffer.from('not a pdf'))).status, 415);
+    assert.equal((await uploadFile(pdf, 'resume.txt', 'text/plain')).status, 415);
+    assert.equal((await uploadFile(Buffer.alloc(1025))).status, 413);
+    assert.equal((await uploadFile(pdf, 'resume.pdf', 'application/pdf', token, 'wrong')).status, 400);
+    assert.equal((await request('/resumes', { method: 'POST', token, body: {} })).status, 400);
+    assert.equal((await readdir(uploadDir)).length, 1);
+    await unlink(path.join(uploadDir, files[0]));
+    assert.equal((await request(`/resumes/${resumeId}/download`, { token })).status, 404);
+
     // Removing an account invalidates its token even before the token expires.
     await db.candidateProfile.deleteMany({ where: { userId: other.body.data.user.id } });
     await db.user.delete({ where: { id: other.body.data.user.id } });
@@ -131,6 +174,8 @@ test('authentication, profiles, and job publishing/search permissions', { skip: 
       const users = await db.user.findMany({ where: { email: { in: emails } }, select: { id: true } });
       const ids = users.map(user => user.id);
       const employers = await db.employerProfile.findMany({ where: { userId: { in: ids } }, select: { id: true } });
+      const candidates = await db.candidateProfile.findMany({ where: { userId: { in: ids } }, select: { id: true } });
+      await db.resume.deleteMany({ where: { candidateId: { in: candidates.map(profile => profile.id) } } });
       await db.job.deleteMany({ where: { employerId: { in: employers.map(profile => profile.id) } } });
       await db.candidateProfile.deleteMany({ where: { userId: { in: ids } } });
       await db.employerProfile.deleteMany({ where: { userId: { in: ids } } });
@@ -138,6 +183,9 @@ test('authentication, profiles, and job publishing/search permissions', { skip: 
     } finally {
       await new Promise(resolve => server.close(resolve));
       await db.$disconnect();
+      // Remove only files within this freshly generated test directory, then remove the empty directory.
+      for (const filename of await readdir(uploadDir)) await unlink(path.join(uploadDir, filename));
+      await rmdir(uploadDir);
     }
   }
 });
