@@ -1,9 +1,7 @@
-// Import configuration validation, the shared database client, and the app factory.
 import { parseEnv } from './config/env.js';
 import { prisma } from './lib/prisma.js';
 import { createApp } from './app.js';
 
-// Track the HTTP server and prevent repeated shutdown attempts.
 let server;
 let stopping = false;
 
@@ -11,10 +9,13 @@ let stopping = false;
 async function shutdown(exitCode) {
   if (stopping) return;
   stopping = true;
+
   const deadline = setTimeout(() => process.exit(1), 10000);
   deadline.unref();
+
   if (server) await new Promise(resolve => server.close(resolve));
   await prisma.$disconnect();
+
   clearTimeout(deadline);
   process.exitCode = exitCode;
 }
@@ -24,25 +25,25 @@ try {
   const env = parseEnv(process.env);
   await prisma.$connect();
   await prisma.$runCommandRaw({ ping: 1 });
-  // Confirm successful database communication without exposing the connection URL.
   console.log('MongoDB connected successfully');
-  // Build the configured application and listen on the chosen port.
+
+  // Start HTTP only after the database is available.
   const app = createApp({ corsOrigin: env.CORS_ORIGIN, db: prisma, jwtSecret: env.JWT_SECRET });
   server = app.listen(env.PORT, () => {
-    // Print the active port and a local health URL only after HTTP startup succeeds.
     console.log(`API listening on port ${env.PORT}`);
     console.log(`Health check: http://localhost:${env.PORT}/api/v1/health`);
   });
-  // Handle listening failures such as a port already being used by another process.
+
+  // Release resources on HTTP failure or a process stop signal.
   server.on('error', () => {
     console.error('HTTP server failed to start. Check the configured port.');
     void shutdown(1);
   });
-  // Release resources when the terminal or hosting platform asks the process to stop.
+
   process.on('SIGINT', () => void shutdown(0));
   process.on('SIGTERM', () => void shutdown(0));
-// Report startup failures without printing database credentials or connection strings.
 } catch (error) {
+  // Report startup failures without exposing connection strings or credentials.
   console.error(error.message.startsWith('Invalid environment variables:')
     ? error.message
     : 'Startup failed. Check database connectivity and configuration.');

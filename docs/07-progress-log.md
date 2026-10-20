@@ -1,5 +1,10 @@
 # Progress log
 
+## 2026-10-20 — Code readability
+
+- Reduced app.js/server.js comments to short explanations per logical section and added blank lines between related blocks at the user's request.
+- Behavior unchanged; both files passed Node syntax checks and the diff passed whitespace checks.
+
 ## 2026-10-20 — Startup feedback
 
 - Added a terminal confirmation after MongoDB connection and ping succeed, followed by the active HTTP port and health URL after listening starts.
