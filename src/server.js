@@ -25,7 +25,7 @@ try {
   await prisma.$connect();
   await prisma.$runCommandRaw({ ping: 1 });
   // Build the configured application and listen on the chosen port.
-  const app = createApp({ corsOrigin: env.CORS_ORIGIN });
+  const app = createApp({ corsOrigin: env.CORS_ORIGIN, db: prisma, jwtSecret: env.JWT_SECRET });
   server = app.listen(env.PORT, () => console.log(`API listening on port ${env.PORT}`));
   // Handle listening failures such as a port already being used by another process.
   server.on('error', () => {

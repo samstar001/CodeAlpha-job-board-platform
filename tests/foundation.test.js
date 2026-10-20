@@ -39,3 +39,22 @@ test('configuration errors identify keys without exposing secrets', () => {
     return true;
   });
 });
+
+// Verify password endpoints stop repeated attempts before expensive authentication work runs.
+test('authentication endpoints enforce the shared attempt limit', async () => {
+  const server = createApp({ corsOrigin: 'http://localhost:3000', db: {}, jwtSecret: 'x'.repeat(48) }).listen(0, '127.0.0.1');
+  await new Promise(resolve => server.once('listening', resolve));
+  try {
+    const url = `http://127.0.0.1:${server.address().port}/api/v1/auth/login`;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      assert.equal(response.status, 400);
+      await response.json();
+    }
+    const blocked = await fetch(url, { method: 'POST' });
+    assert.equal(blocked.status, 429);
+    assert.equal((await blocked.json()).error.code, 'RATE_LIMITED');
+  } finally {
+    await new Promise(resolve => server.close(resolve));
+  }
+});

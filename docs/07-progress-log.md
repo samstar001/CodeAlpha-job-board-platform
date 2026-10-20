@@ -1,5 +1,14 @@
 # Progress log
 
+## 2026-10-20 — Phase 2: authentication and profiles
+
+- Advanced local main to verified setup commit 5c7f25a and created feat/auth-profiles.
+- Added strict registration/login validation, normalized email, bcrypt hashes, atomic nested user/profile creation, one-hour signed JWTs, current-user lookup, role guards, and own-profile editing.
+- Added safe business errors, authentication rate limits, and a walkthrough explaining the request flow and Postman requests. Existing one-line section comments continue in new code.
+- MongoDB integration passed against job_board_test: both roles, duplicate email, hash storage, invalid input, login, token checks, profile edits, role denial, ownership, and removed-user tokens. Fictional test records were cleaned up.
+- No schema change or development-data modification was needed. Optional refresh/logout/password-reset/email-verification flows remain outside scope.
+- Final local regression run passed all three checks; database integration is deliberately skipped by the ordinary test command and was run separately successfully.
+
 ## 2026-10-20 — Reading comments and branch naming
 
 - Added one-line explanations for logical sections in application code, tests, Prisma configuration, and schema; runtime behavior is unchanged.
