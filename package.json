@@ -1,0 +1,39 @@
+{
+  "name": "codealpha-job-board-platform",
+  "version": "1.0.0",
+  "description": "A Node.js and Express REST API connecting employers who post jobs with candidates who apply using resumes.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samstar001/CodeAlpha-job-board-platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/samstar001/CodeAlpha-job-board-platform/issues"
+  },
+  "homepage": "https://github.com/samstar001/CodeAlpha-job-board-platform#readme",
+  "dependencies": {
+    "@prisma/client": "6.19.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "prisma": "6.19.0"
+  }
+}
