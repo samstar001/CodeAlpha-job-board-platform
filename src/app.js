@@ -10,6 +10,7 @@ import { createProfileController } from './modules/profiles/profiles.controller.
 import { jobRoutes } from './modules/jobs/jobs.routes.js';
 import { resumeRoutes } from './modules/resumes/resumes.routes.js';
 import { applicationRoutes } from './modules/applications/applications.routes.js';
+import { notificationRoutes } from './modules/notifications/notifications.routes.js';
 
 // Configure the app independently of the server so it can be tested without startup.
 export function createApp({ corsOrigin, db, jwtSecret, uploadDir = './storage/resumes', maxResumeBytes = 5242880 }) {
@@ -34,6 +35,7 @@ export function createApp({ corsOrigin, db, jwtSecret, uploadDir = './storage/re
     app.use('/api/v1', jobRoutes(db, guard));
     app.use('/api/v1', resumeRoutes(db, guard, { uploadDir, maxResumeBytes }));
     app.use('/api/v1', applicationRoutes(db, guard));
+    app.use('/api/v1', notificationRoutes(db, guard));
   }
 
   // Keep fallback and error handlers after all routes.

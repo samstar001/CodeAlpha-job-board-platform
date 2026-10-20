@@ -1,5 +1,12 @@
 # Progress log
 
+## 2026-10-20 — Phase 6: employer notification inbox
+
+- Advanced main to applications commit c40fc8a and created feat/notifications.
+- Added own-employer paginated inbox, strict unread filtering (including MongoDB missing/null handling), and idempotent mark-read preserving the first timestamp.
+- Full job_board_test workflow passed in approximately 96 seconds, including notification ownership, candidate role denial, invalid filters, read/unread transitions, and repeated-read timestamps. Five local regression tests passed separately.
+- No new packages or schema changes were required; existing Express, Zod, Prisma Client, and JWT middleware are reused.
+
 ## 2026-10-20 — Phase 5: applications and tracking
 
 - Advanced main to resume commit 621cc20, then created feat/applications.

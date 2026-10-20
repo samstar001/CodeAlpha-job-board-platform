@@ -217,6 +217,23 @@ test('authentication, jobs, resumes, and application lifecycle', { skip: process
     assert.equal((await request(statusPath, { method: 'PATCH', token: employerToken, body: { status: 'REJECTED', version: 4 } })).status, 409);
     assert.equal((await request(`/applications/${application.id}`, { token })).body.data.status, 'HIRED');
 
+    // An employer sees only their inbox; marking read is idempotent and filters update accordingly.
+    const inbox = await request('/notifications/me?unread=true', { token: employerToken });
+    assert.equal(inbox.status, 200);
+    assert.equal(inbox.body.meta.total, 1);
+    const notificationId = inbox.body.data[0].id;
+    assert.equal(inbox.body.data[0].applicationId, application.id);
+    assert.equal((await request('/notifications/me', { token })).status, 403);
+    assert.equal((await request('/notifications/me', { token: outsiderToken })).body.meta.total, 0);
+    assert.equal((await request(`/notifications/${notificationId}/read`, { method: 'PATCH', token: outsiderToken })).status, 404);
+    assert.equal((await request('/notifications/me?unread=invalid', { token: employerToken })).status, 400);
+    const marked = await request(`/notifications/${notificationId}/read`, { method: 'PATCH', token: employerToken });
+    assert.equal(marked.status, 200);
+    assert.ok(marked.body.data.readAt);
+    assert.equal((await request(`/notifications/${notificationId}/read`, { method: 'PATCH', token: employerToken })).body.data.readAt, marked.body.data.readAt);
+    assert.equal((await request('/notifications/me?unread=true', { token: employerToken })).body.meta.total, 0);
+    assert.equal((await request('/notifications/me?unread=false', { token: employerToken })).body.meta.total, 1);
+
     await unlink(path.join(uploadDir, files[0]));
     assert.equal((await request(`/resumes/${resumeId}/download`, { token })).status, 404);
 
